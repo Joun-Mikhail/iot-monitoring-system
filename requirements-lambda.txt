@@ -1,0 +1,4 @@
+# Lambda-specific runtime dependencies.
+# boto3 is intentionally excluded — the Lambda Python 3.11 runtime ships it.
+# Add third-party packages here if handler.py ever gains new imports.
+# Keep this file even if empty — build_lambda.sh checks for it.
