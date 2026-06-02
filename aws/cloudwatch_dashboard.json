@@ -1,0 +1,116 @@
+{
+  "widgets": [
+    {
+      "type": "metric",
+      "x": 0, "y": 0, "width": 12, "height": 6,
+      "properties": {
+        "title": "Anomaly count by device (5-min sum)",
+        "view": "timeSeries",
+        "stacked": false,
+        "metrics": [
+          ["IoTSensors", "anomaly_count", "device_id", "sensor-01", {"stat": "Sum", "period": 300, "label": "sensor-01"}],
+          ["IoTSensors", "anomaly_count", "device_id", "sensor-02", {"stat": "Sum", "period": 300, "label": "sensor-02"}]
+        ],
+        "yAxis": {"left": {"min": 0}},
+        "region": "eu-central-1"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12, "y": 0, "width": 12, "height": 6,
+      "properties": {
+        "title": "Normal vs anomaly — fleet total (5-min)",
+        "view": "timeSeries",
+        "stacked": true,
+        "metrics": [
+          ["IoTSensors", "normal_count",  {"stat": "Sum", "period": 300, "label": "normal",  "color": "#2ca02c"}],
+          ["IoTSensors", "anomaly_count", {"stat": "Sum", "period": 300, "label": "anomaly", "color": "#d62728"}]
+        ],
+        "region": "eu-central-1"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0, "y": 6, "width": 12, "height": 6,
+      "properties": {
+        "title": "Anomaly rate % per device (5-min rolling) — SAFE DIV",
+        "view": "timeSeries",
+        "metrics": [
+          [{"expression": "IF(m1+m2>0, 100*m1/(m1+m2), 0)", "label": "sensor-01 anomaly %", "id": "e1", "region": "eu-central-1"}],
+          ["IoTSensors", "anomaly_count", "device_id", "sensor-01", {"id": "m1", "stat": "Sum", "period": 300, "visible": false}],
+          ["IoTSensors", "normal_count",  "device_id", "sensor-01", {"id": "m2", "stat": "Sum", "period": 300, "visible": false}]
+        ],
+        "yAxis": {"left": {"min": 0, "max": 100, "label": "%"}},
+        "region": "eu-central-1"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12, "y": 6, "width": 12, "height": 6,
+      "properties": {
+        "title": "Lambda processing latency (ms) — p50 / p95 / p99",
+        "view": "timeSeries",
+        "metrics": [
+          ["IoTSensors", "processing_duration_ms", {"stat": "p50", "period": 300, "label": "p50", "color": "#1f77b4"}],
+          ["IoTSensors", "processing_duration_ms", {"stat": "p95", "period": 300, "label": "p95", "color": "#ff7f0e"}],
+          ["IoTSensors", "processing_duration_ms", {"stat": "p99", "period": 300, "label": "p99", "color": "#d62728"}]
+        ],
+        "yAxis": {"left": {"min": 0, "label": "ms"}},
+        "region": "eu-central-1"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0, "y": 12, "width": 12, "height": 6,
+      "properties": {
+        "title": "Validation errors by device (bad payloads reaching Lambda)",
+        "view": "timeSeries",
+        "metrics": [
+          ["IoTSensors", "validation_error_count", "device_id", "sensor-01", {"stat": "Sum", "period": 300, "label": "sensor-01", "color": "#9467bd"}],
+          ["IoTSensors", "validation_error_count", "device_id", "unknown",   {"stat": "Sum", "period": 300, "label": "unknown device", "color": "#8c564b"}]
+        ],
+        "yAxis": {"left": {"min": 0}},
+        "region": "eu-central-1",
+        "annotations": {
+          "horizontal": [{"value": 1, "label": "any validation error", "color": "#9467bd", "fill": "above"}]
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12, "y": 12, "width": 12, "height": 6,
+      "properties": {
+        "title": "Lambda invocation errors + throttles",
+        "view": "timeSeries",
+        "metrics": [
+          ["AWS/Lambda", "Errors",    "FunctionName", "process_sensor_data", {"stat": "Sum", "period": 300, "label": "errors",    "color": "#d62728"}],
+          ["AWS/Lambda", "Throttles", "FunctionName", "process_sensor_data", {"stat": "Sum", "period": 300, "label": "throttles", "color": "#ff7f0e"}],
+          ["AWS/Lambda", "Duration",  "FunctionName", "process_sensor_data", {"stat": "p95", "period": 300, "label": "p95 duration ms", "yAxis": "right"}]
+        ],
+        "yAxis": {
+          "left":  {"min": 0, "label": "count"},
+          "right": {"min": 0, "label": "ms"}
+        },
+        "region": "eu-central-1"
+      }
+    },
+    {
+      "type": "alarm",
+      "x": 0, "y": 18, "width": 6, "height": 3,
+      "properties": {
+        "title": "Anomaly alarm — fleet",
+        "alarms": ["arn:aws:cloudwatch:eu-central-1:ACCOUNT_ID:alarm:IoT-AnomalyAlert"]
+      }
+    },
+    {
+      "type": "log",
+      "x": 6, "y": 18, "width": 18, "height": 6,
+      "properties": {
+        "title": "Recent CRITICAL events (last 50)",
+        "query": "SOURCE '/aws/lambda/process_sensor_data'\n| fields @timestamp, device_id, temperature, humidity, status\n| filter status = 'CRITICAL'\n| sort @timestamp desc\n| limit 50",
+        "region": "eu-central-1",
+        "view": "table"
+      }
+    }
+  ]
+}
