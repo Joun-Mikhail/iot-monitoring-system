@@ -24,6 +24,7 @@ making any architectural decisions based on it.
 ---
 
 ## System architecture
+<img width="1353" height="1162" alt="9763496d-044d-4795-9e42-0c37110de822" src="https://github.com/user-attachments/assets/a5e5a1bb-8580-4626-a6b3-32a4767f1b57" />
 
 ```
 [simulator/publisher.py]
